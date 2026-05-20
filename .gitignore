@@ -1,0 +1,12 @@
+build/
+.cache/
+*.engine
+*.plan
+*.onnx
+*.npz
+*.pt
+*.pth
+models/downloads/
+data/
+*.mp4
+.DS_Store
