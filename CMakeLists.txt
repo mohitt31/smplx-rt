@@ -15,8 +15,11 @@ add_library(smplxrt
   src/preprocess/cpu_preprocess.cpp
   src/engine/engine.cpp
   src/smplx/lbs.cpp
+  src/smplx/kinematics.cpp
   src/filter/one_euro.cpp
+  src/filter/rotation_filter.cpp
   src/pipeline/pipeline.cpp
+  src/interop/cuda_vulkan.cpp
 )
 target_include_directories(smplxrt PUBLIC include)
 target_compile_features(smplxrt PUBLIC cxx_std_17)
@@ -55,4 +58,7 @@ if(SMPLXRT_BUILD_TESTS)
   add_executable(test_lbs_parity tests/test_lbs_parity.cpp)
   target_link_libraries(test_lbs_parity PRIVATE smplxrt)
   add_test(NAME lbs_parity COMMAND test_lbs_parity)
+  add_executable(test_runtime tests/test_runtime.cpp)
+  target_link_libraries(test_runtime PRIVATE smplxrt)
+  add_test(NAME runtime COMMAND test_runtime)
 endif()

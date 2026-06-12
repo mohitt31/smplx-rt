@@ -2,7 +2,7 @@
 
 An honest, performance-oriented scaffold for real-time single-person monocular SMPL-X reconstruction. The target is a 10,475-vertex SMPL-X mesh overlay at 720p and 60 FPS on an RTX GPU—measured, not assumed.
 
-> Status: Gate 0 scaffold. The portable C++ reference paths and tests work now; detector, RTMPose, chosen SMPL-X regressor, TensorRT bindings, and the full CUDA parity path remain explicit milestones. No benchmark claims are made yet.
+> Status: Gate 0 / core LLD. The portable C++ reference and runtime contracts work now; detector, RTMPose, chosen SMPL-X regressor, TensorRT bindings, and the full CUDA parity path remain explicit milestones. No RTX performance claim is made yet.
 
 ## Pipeline
 
@@ -39,6 +39,9 @@ cmake --build build-cuda --parallel
 - One Euro scalar filter with increasing-timestamp validation.
 - CUDA kernel entry points for fused preprocess and sparse LBS, guarded behind `SMPLXRT_WITH_CUDA`.
 - Reproducible CI for the no-GPU reference layer and a results template that forbids guessed figures.
+- A bounded lock-free SPSC handoff, triple-buffer scheduling contract, and an explicit non-owning GPU-frame token—no hidden heap allocation in those control paths.
+- 6D rotation filtering followed by SO(3) projection, plus a rest-length bone-constraint pass.
+- A CUDA–Vulkan external-memory capability boundary that can be enabled and validated on supported Linux/NVIDIA systems.
 
 ## Gate 0: do this before model integration
 
@@ -69,3 +72,9 @@ SMPL-X model files are not included and must never be committed. Obtain them aft
 4. `docs/RESULTS.md` contains p50/p99, hardware, accuracy, input hash, and precision for 1,000 post-warmup frames.
 
 See [docs/RESULTS.md](docs/RESULTS.md) for the intentionally blank optimization ladder.
+
+## Engineering evidence
+
+- [Architecture and ownership model](docs/ARCHITECTURE.md)
+- [RTX validation protocol](docs/EVALUATION_PLAN.md)
+- [Résumé-safe project wording](docs/RESUME.md)
