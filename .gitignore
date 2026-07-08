@@ -10,3 +10,7 @@ models/downloads/
 data/
 *.mp4
 .DS_Store
+models/*.zip
+.venv/
+runs/
+build-*/

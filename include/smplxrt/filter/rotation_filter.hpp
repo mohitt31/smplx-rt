@@ -8,7 +8,9 @@ class RotationFilter {
  public:
   RotationFilter(float min_cutoff = 1.F, float beta = 0.02F);
   Rotation6D update(const Rotation6D& input, double timestamp_seconds);
- private: std::array<OneEuroFilter, 6> filters_;
+
+ private:
+  std::array<OneEuroFilter, 6> filters_;
 };
 Quaternion quaternion_from_rotation6d(const Rotation6D& rotation);
 }  // namespace smplxrt

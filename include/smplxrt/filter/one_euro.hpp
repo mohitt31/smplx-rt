@@ -6,6 +6,7 @@ class OneEuroFilter {
   OneEuroFilter(float min_cutoff = 1.F, float beta = 0.02F, float derivative_cutoff = 1.F);
   float update(float value, double timestamp_seconds);
   void reset();
+
  private:
   float alpha(float cutoff, float dt) const;
   float min_cutoff_, beta_, derivative_cutoff_;

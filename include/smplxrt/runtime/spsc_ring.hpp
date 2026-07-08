@@ -11,7 +11,9 @@ namespace smplxrt {
 // Producer and consumer own different cursors, so hot-path operations are lock-free.
 template <typename T, std::size_t Capacity>
 class SpscRing {
-  static_assert(Capacity >= 2 && (Capacity & (Capacity - 1)) == 0, "Capacity must be a power of two");
+  static_assert(Capacity >= 2 && (Capacity & (Capacity - 1)) == 0,
+                "Capacity must be a power of two");
+
  public:
   bool try_push(T value) noexcept(std::is_nothrow_move_assignable<T>::value) {
     const auto write = write_.load(std::memory_order_relaxed);
@@ -28,7 +30,10 @@ class SpscRing {
     read_.store((read + 1) & kMask, std::memory_order_release);
     return value;
   }
-  bool empty() const noexcept { return read_.load(std::memory_order_acquire) == write_.load(std::memory_order_acquire); }
+  bool empty() const noexcept {
+    return read_.load(std::memory_order_acquire) == write_.load(std::memory_order_acquire);
+  }
+
  private:
   static constexpr std::size_t kMask = Capacity - 1;
   alignas(64) std::array<T, Capacity> storage_{};

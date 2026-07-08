@@ -1,4 +1,6 @@
-# Core LLD: frame ownership, scheduling, and synchronization
+# Planned GPU design: frame ownership, scheduling, and synchronization
+
+> This is the design for the NVIDIA/TensorRT stage, which is not built yet. What runs today is the ONNX Runtime + OpenCV pipeline described in the README.
 
 This design separates a frame's **ownership**, **readiness**, and **completion**. It prevents the most common low-latency error: treating a CUDA stream as though it made a buffer lifetime safe.
 
@@ -33,7 +35,7 @@ The hard requirement is end-to-end p99 below 16.6 ms, not merely high throughput
 
 ## Interop boundary
 
-The production Linux implementation should export a Vulkan buffer using `VK_KHR_external_memory_fd`, import it with `cudaImportExternalMemory`, map it once, and exchange external semaphores around each frame. The `CudaVulkanBridge` layer exists so that this platform-specific implementation does not leak into SMPL-X math or inference code. macOS validates portable/reference paths; it does not substantiate NVIDIA CUDA interop claims.
+The production Linux implementation should export a Vulkan buffer using `VK_KHR_external_memory_fd`, import it with `cudaImportExternalMemory`, map it once, and exchange external semaphores around each frame. It should sit behind its own small interface so that this platform-specific code does not leak into SMPL-X math or inference code. macOS validates portable/reference paths; it does not substantiate NVIDIA CUDA interop claims.
 
 ## Numerical constraints
 

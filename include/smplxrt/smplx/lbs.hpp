@@ -1,7 +1,10 @@
 #pragma once
 #include "smplxrt/common.hpp"
 namespace smplxrt {
-struct SparseWeights { std::array<std::uint16_t, 4> joints{}; std::array<float, 4> weights{}; };
+struct SparseWeights {
+  std::array<std::uint16_t, 4> joints{};
+  std::array<float, 4> weights{};
+};
 struct LbsModel {
   std::vector<Vec3> template_vertices;
   std::vector<SparseWeights> skinning;
