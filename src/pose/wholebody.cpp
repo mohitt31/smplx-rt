@@ -60,16 +60,33 @@ void PersonDetector::infer() {
 }
 
 std::vector<Box> PersonDetector::postprocess() const {
-  // dets: [1, N, 5] as x1, y1, x2, y2, score in letterboxed input coordinates.
-  const auto& dets = outputs_.at(0);
-  require(dets.shape.size() == 3 && dets.shape[2] == 5, "unexpected detector output shape");
   std::vector<Box> boxes;
-  boxes.reserve(dets.shape[1]);
-  for (int i = 0; i < dets.shape[1]; ++i) {
-    const float* d = dets.values.data() + 5 * i;
-    boxes.push_back({d[0] / ratio_, d[1] / ratio_, d[2] / ratio_, d[3] / ratio_, d[4]});
+  if (outputs_.size() == 1) {
+    // End-to-end export: dets [1, N, 5] as x1, y1, x2, y2, score, NMS already applied.
+    const auto& dets = outputs_[0];
+    require(dets.shape.size() == 3 && dets.shape[2] == 5, "unexpected detector output shape");
+    boxes.reserve(dets.shape[1]);
+    for (int i = 0; i < dets.shape[1]; ++i) {
+      const float* d = dets.values.data() + 5 * i;
+      boxes.push_back({d[0] / ratio_, d[1] / ratio_, d[2] / ratio_, d[3] / ratio_, d[4]});
+    }
+    return boxes;
   }
-  return boxes;
+  // Pre-NMS export from tools/prepare_models.py: boxes [1, N, 4] and person_scores [1, N, 1].
+  require(outputs_.size() == 2, "unexpected detector outputs");
+  const auto& xyxy = outputs_[0];
+  const auto& scores = outputs_[1];
+  require(xyxy.shape.size() == 3 && xyxy.shape[2] == 4 && scores.shape.size() == 3 &&
+              scores.shape[1] == xyxy.shape[1] && scores.shape[2] == 1,
+          "unexpected pre-NMS detector output shapes");
+  for (int i = 0; i < xyxy.shape[1]; ++i) {
+    const float score = scores.values[i];
+    if (score <= kScoreThreshold) continue;
+    const float* d = xyxy.values.data() + 4 * i;
+    boxes.push_back({d[0] / ratio_, d[1] / ratio_, d[2] / ratio_, d[3] / ratio_, score});
+  }
+  // IoU 0.5 as in the export's own post-processing config (detail.json).
+  return nms(std::move(boxes), kScoreThreshold, 0.5F);
 }
 
 WholebodyPose::WholebodyPose(std::unique_ptr<Engine> engine) : engine_(std::move(engine)) {

@@ -44,6 +44,7 @@ if(SMPLXRT_WITH_ORT)
 
   add_executable(pose_video apps/pose_video.cpp)
   target_link_libraries(pose_video PRIVATE smplxrt)
+  target_compile_features(pose_video PRIVATE cxx_std_20)  # std::jthread
   set_target_properties(pose_video PROPERTIES BUILD_RPATH ${ORT_LIBRARY_DIR})
 endif()
 

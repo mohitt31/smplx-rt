@@ -34,6 +34,18 @@ CropTransform crop_transform(const Box& box, int input_w, int input_h, float pad
 // Highest-scoring box above `threshold`, or a box covering the whole image if there is none.
 Box pick_person(const std::vector<Box>& boxes, int image_w, int image_h, float threshold = 0.3F);
 
+// Greedy non-maximum suppression. Keeps boxes above `score_threshold`, highest score first,
+// dropping any box whose IoU with an already kept box exceeds `iou_threshold`.
+std::vector<Box> nms(std::vector<Box> boxes, float score_threshold, float iou_threshold);
+float iou(const Box& a, const Box& b);
+
+// Box around keypoints scoring above `threshold`, scaled by `expansion` about its centre and
+// clipped to the image. Used to track the person between detector runs; rtmlib's tracker uses
+// 1.25 so the box is close to what the detector returns. Returns false if fewer than
+// `min_visible` keypoints qualify.
+bool box_from_keypoints(const std::vector<Keypoint>& keypoints, float threshold, int min_visible,
+                        int image_w, int image_h, Box* out, float expansion = 1.F);
+
 // Decodes SimCC outputs (K x bins_x and K x bins_y, row major) to keypoints in crop coordinates.
 // The score is the mean of the two per-axis maxima, as in rtmlib.
 void decode_simcc(const float* simcc_x, int bins_x, const float* simcc_y, int bins_y, int keypoints,

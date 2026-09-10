@@ -57,6 +57,25 @@ int main() {
   const auto none = pick_person({{0, 0, 10, 10, 0.1F}}, 640, 480);
   check(near(none.x2, 640.F) && near(none.y2, 480.F), "fallback to full frame");
 
+  // NMS: the lower-scoring overlapping box goes, the separate one stays, low scores are dropped.
+  const auto kept = nms(
+      {{0, 0, 10, 10, 0.6F}, {1, 1, 10, 10, 0.9F}, {50, 50, 60, 60, 0.5F}, {70, 70, 80, 80, 0.1F}},
+      0.3F, 0.5F);
+  check(kept.size() == 2 && near(kept[0].score, 0.9F) && near(kept[1].x1, 50.F), "nms");
+  check(near(iou({0, 0, 10, 10, 0}, {5, 0, 15, 10, 0}), 50.F / 150.F), "iou");
+
+  // Tracking box: tight around visible keypoints, clipped; too few visible means lost.
+  Box tracked;
+  const std::vector<Keypoint> body = {
+      {10, 20, 0.9F}, {-5, 40, 0.8F}, {30, 700, 0.7F}, {99, 99, 0.1F}};
+  check(box_from_keypoints(body, 0.3F, 3, 640, 480, &tracked) && near(tracked.x1, 0.F) &&
+            near(tracked.y2, 480.F) && near(tracked.x2, 30.F),
+        "box from keypoints");
+  check(!box_from_keypoints(body, 0.3F, 4, 640, 480, &tracked), "tracking lost");
+  check(box_from_keypoints({{100, 100, 1.F}, {200, 300, 1.F}}, 0.3F, 2, 640, 480, &tracked, 1.5F) &&
+            near(tracked.x1, 75.F) && near(tracked.y2, 350.F),
+        "expanded tracking box");
+
   if (failures == 0) std::cout << "pose geometry checks passed\n";
   return failures == 0 ? 0 : 1;
 }

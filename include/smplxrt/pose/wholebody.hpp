@@ -11,9 +11,11 @@ namespace smplxrt {
 
 constexpr int kWholebodyKeypoints = 133;  // COCO-WholeBody: 17 body, 6 feet, 68 face, 2x21 hands.
 
-// YOLOX person detector (mmdeploy end-to-end export with NMS inside the graph).
+// YOLOX person detector. Accepts the mmdeploy end-to-end export (NMS inside the graph) or the
+// pre-NMS person-only graph written by tools/prepare_models.py (NMS done here).
 class PersonDetector {
  public:
+  static constexpr float kScoreThreshold = 0.3F;
   explicit PersonDetector(std::unique_ptr<Engine> engine);
   void preprocess(const cv::Mat& bgr);
   void infer();
